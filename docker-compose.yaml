@@ -1,0 +1,15 @@
+services:
+  db:
+    restart: always
+    image: postgres:latest
+    ports:
+      - "5443:5432"
+    environment:
+      - POSTGRES_DB=shortener
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+
+volumes:
+  db:
+  clickhouse_data:
+  clickhouse_config:

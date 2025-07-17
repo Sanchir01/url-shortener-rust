@@ -6,9 +6,7 @@ services:
     ports:
       - "4200:4200"
     depends_on:
-      - clickhouse
       - db
-
   db:
     restart: always
     image: postgres:latest

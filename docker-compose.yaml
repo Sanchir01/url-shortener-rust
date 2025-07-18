@@ -1,4 +1,12 @@
 services:
+  shortener:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    command: ./url-shortener
+    restart: always
   db:
     restart: always
     image: postgres:latest
@@ -10,6 +18,5 @@ services:
       - POSTGRES_USER=postgres
 
 volumes:
+  shortener:
   db:
-  clickhouse_data:
-  clickhouse_config:

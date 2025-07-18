@@ -7,7 +7,6 @@ use crate::app::services::Services;
 use crate::servers::http::server::run_http_server;
 use crate::utils::db::init_primary_db;
 
-use dotenvy::dotenv;
 mod app;
 mod domain;
 mod feature;
@@ -24,7 +23,6 @@ static GLOBAL: GlobalAlloc = GlobalAlloc;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    dotenv().ok().expect("Could not load .env file");
 
     let config = Config::new().await;
     let http_server = config.server.clone().unwrap_or_else(|| {

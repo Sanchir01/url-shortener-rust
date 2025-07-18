@@ -6,12 +6,8 @@ edition = "2024"
 [dependencies]
 tokio = { version = "1.45.1", features = ["full"] }
 serde = { version = "1.0.219", features = ["derive"] }
-regex = "1.11.1"
 toml = "0.8.23"
 mimalloc = { version = "0.1.46" }
-
-fake = { version = "4.2.0", features = ["derive", "chrono"] }
-dotenvy = "0.15.7"
 tower-http = { version = "0.6.6", features = ["cors"] }
 axum = "0.8.4"
 humantime = "2.1.0"
@@ -21,7 +17,6 @@ sqlx = { version = "0.8.6", features = [
   "chrono",
   "uuid",
 ] }
-anyhow = "1.0.98"
 uuid = { version = "1", features = ["v4", "serde"] }
 async-trait = "0.1.88"
 mockall = "0.13.1"
@@ -38,3 +33,6 @@ debug = 2
 lto = "fat"
 codegen-units = 1
 strip = true
+
+[target.x86_64-unknown-linux-musl]
+rustflags = ["-C", "target-feature=-crt-static"]

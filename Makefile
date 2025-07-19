@@ -9,14 +9,10 @@ FOLDER_PG= migrations/pg
 compose:
 	docker-compose up -d
 
-metrics:
-	cargo watch -x 'run -p metrics-server'
-
-url	:
+run:
 	cargo watch -x 'run -p url-shortener'
 
-run-prod:
-	cargo run --release -p metrics
+
 
 workspace:
 	cargo watch -x 'run -p metrics-server' && cargo watch -x 'run -p url-shortener'

@@ -8,7 +8,7 @@ idle_timeout="60s"
 [database]
 username = "postgres"
 password = "postgres"
-host = "db"
+host = "localhost"
 port = 5443
 database = "shortener"
 retry = 3

@@ -52,7 +52,6 @@ pub enum State {
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     init_env();
-    pretty_env_logger::init();
     log::info!("Starting throw dice bot...");
     let bot = Bot::new(
         std::env::var("TELOXIDE_TOKEN").expect("TELOXIDE_TOKEN env var not set"),
@@ -160,10 +159,6 @@ async fn receive_full_url(bot: Bot, dialogue: MyDialogue, msg: Message, services
     }
     Ok(())
 }
-
-
-
-
 
 fn init_env() {
     #[cfg(debug_assertions)]

@@ -4,9 +4,9 @@ WORKDIR /app
 
 COPY . .
 
-RUN cargo build --release --target x86_64-unknown-linux-musl
+RUN cargo build --release --target x86_64-unknown-linux-musl --verbose
 
-FROM alpine:3.20 AS runner
+FROM scratch AS runner
 
 RUN apk add --no-cache libgcc
 

@@ -6,9 +6,7 @@ COPY . .
 
 RUN cargo build --release --target x86_64-unknown-linux-musl --verbose
 
-FROM alpine:3.20 AS runner
-
-RUN apk add --no-cache libgcc
+FROM scratch AS runner
 
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/url-shortener ./url-shortener
 

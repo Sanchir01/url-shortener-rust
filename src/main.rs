@@ -51,7 +51,7 @@ pub enum State {
 }
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    dotenv().expect("dotenv init failed");
+    init_env();
     pretty_env_logger::init();
     log::info!("Starting throw dice bot...");
     let bot = Bot::from_env();
@@ -163,3 +163,11 @@ async fn receive_full_url(bot: Bot, dialogue: MyDialogue, msg: Message, services
 
 
 
+fn init_env() {
+    #[cfg(debug_assertions)]
+    {
+        dotenvy::dotenv().ok();
+    }
+
+    pretty_env_logger::init();
+}

@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4200:4200"
+    env_file:
+      ".env"
     command: ./url-shortener
     restart: always
 volumes:

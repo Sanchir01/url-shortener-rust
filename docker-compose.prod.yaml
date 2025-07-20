@@ -6,7 +6,8 @@ services:
     ports:
       - "4200:4200"
     environment:
-      "TELOXIDE_TOKEN":""
+      - TELOXIDE_TOKEN = ${TELOXIDE_TOKEN}
+      - RUST_LOG=debug
     command: ./url-shortener
     restart: always
 volumes:

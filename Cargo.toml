@@ -31,10 +31,11 @@ teloxide = { version = "0.17.0", features = ["macros"] }
 url = "2.5.4"
 anyhow = "1.0.98"
 regex = "1.11.1"
-openssl = { version = "0.10", features = ["vendored"] }
+
 
 [target.'cfg(not(target_os = "windows"))'.dependencies]
 jemallocator = { version = "0.5.4" }
+openssl = { version = "0.10", features = ["vendored"] }
 
 [profile.release]
 opt-level = 3

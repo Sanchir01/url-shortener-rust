@@ -1,8 +1,9 @@
 use async_trait::async_trait;
 use mockall::{automock, predicate::*};
-use sea_query::{Alias, PostgresQueryBuilder, Query};
+use rand::rngs::adapter::ReseedingRng;
+use sea_query::{Alias, Expr, Iden, PostgresQueryBuilder, Query};
 use sqlx::{Pool, Postgres, query_as};
-
+use uuid::Uuid;
 use crate::domain::url::Url;
 
 #[cfg_attr(test, automock)]
@@ -10,6 +11,7 @@ use crate::domain::url::Url;
 pub trait UrlRepositoryTrait: Send + Sync {
     async fn get_all_url(&self) -> Result<Vec<Url>, sqlx::Error>;
     async fn add_url(&self, url: String, aliase: String) -> Result<(), sqlx::Error>;
+    async fn delete_url(&self, id: Uuid) -> Result<(),sqlx::Error>;
 }
 
 #[derive(Clone)]
@@ -53,6 +55,18 @@ impl UrlRepositoryTrait for UrlRepository {
             .execute(&self.primary_db)
             .await?;
 
+        Ok(())
+    }
+    async fn delete_url(&self, id: Uuid) -> Result<(),sqlx::Error> {
+        let (sql, _) = Query::delete()
+            .from_table("url")
+            .and_where(Expr::col("id").eq(Expr::val(id.to_string())))
+            .build(PostgresQueryBuilder);
+
+        sqlx::query(&sql)
+            .bind(id)
+            .execute(&self.primary_db)
+            .await?;
         Ok(())
     }
 }

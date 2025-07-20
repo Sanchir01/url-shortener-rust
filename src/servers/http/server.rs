@@ -1,7 +1,6 @@
-use crate::feature::url::handler::create_url_handler;
+use crate::feature::url::handler::{create_url_handler, delete_url_handler};
 use crate::{app::handlers::Handlers, feature::url::handler::get_all_url_handler_axum};
-use axum::routing::post;
-use axum::{Router, routing::get};
+use axum::{Router, routing::{get,delete, post}};
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
@@ -13,6 +12,7 @@ pub async fn run_http_server(host: &str, port: u16, handlers: Arc<Handlers>) {
     let public_routes = Router::new()
         .route("/url", get(get_all_url_handler_axum))
         .route("/url/save", post(create_url_handler))
+        .route("/url/{id}",delete(delete_url_handler))
         .with_state(handlers.url_handler.clone());
 
     let app = axum::Router::new()

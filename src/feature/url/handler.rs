@@ -1,11 +1,13 @@
 use std::sync::Arc;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::extract::Path;
 use axum::response::Response;
 use serde_json;
+use uuid::Uuid;
 use validator::Validate;
 
 use crate::{domain::url::Url, feature::url::service::{UrlService, UrlServiceTrait}};
-use crate::feature::url::entity::CreateUrlDTO;
+use crate::feature::url::entity::{CreateUrlDTO, DeleteUrlDto};
 
 pub struct UrlHandler {
     url_service: Arc<UrlService>,
@@ -56,6 +58,20 @@ pub async fn create_url_handler(
     match handlers.url_service.create_url(payload.url).await {
          Ok(_) => (  StatusCode::CREATED,
             Json("Saved".to_string())
+        ),
+        Err(_) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json("Error while saving".to_string())
+        )
+    }
+}
+pub async fn delete_url_handler(
+     State(handlers): State<Arc<UrlHandler>>,
+     Path(id): Path<Uuid>,
+) -> impl IntoResponse {
+    match handlers.url_service.delete_url(id).await {
+        Ok(_) => (  StatusCode::CREATED,
+                    Json("Deleted".to_string())
         ),
         Err(_) => (
             StatusCode::INTERNAL_SERVER_ERROR,

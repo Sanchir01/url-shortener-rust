@@ -54,6 +54,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "862ed96ca487e809f1c8e5a8447f6ee2cf102f846893800b20cebdf541fc6bbd"
 
 [[package]]
+name = "anyhow"
+version = "1.0.98"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
+
+[[package]]
 name = "aquamarine"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2930,6 +2936,7 @@ dependencies = [
 name = "url-shortener"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "async-trait",
  "axum",
  "dotenvy",
@@ -2940,6 +2947,7 @@ dependencies = [
  "mockall",
  "pretty_env_logger",
  "rand",
+ "regex",
  "sea-query",
  "serde",
  "serde_json",
@@ -2948,6 +2956,7 @@ dependencies = [
  "tokio",
  "toml",
  "tower-http",
+ "url",
  "uuid",
  "validator",
 ]

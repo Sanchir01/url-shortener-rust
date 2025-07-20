@@ -7,7 +7,7 @@ use crate::app::repositories::Repositories;
 use crate::app::services::Services;
 use crate::servers::http::server::run_http_server;
 use crate::utils::db::init_primary_db;
-use teloxide::{dispatching::dialogue::InMemStorage, prelude::*};
+use teloxide::{dispatching::dialogue::InMemStorage,utils::command::BotCommands, prelude::*};
 mod app;
 mod domain;
 mod feature;
@@ -20,24 +20,35 @@ use jemallocator::Jemalloc as GlobalAlloc;
 
 #[cfg(target_os = "windows")]
 use mimalloc::MiMalloc as GlobalAlloc;
+use sea_query::Iden;
+use teloxide::sugar::bot::BotMessagesExt;
+use teloxide::types::{BotCommand, BotCommandScope};
+use url::Url;
 use crate::feature::url::service::UrlServiceTrait;
+use crate::utils::url::{extract_first_valid_url_from_message};
 
+#[global_allocator]
+static GLOBAL: GlobalAlloc = GlobalAlloc;
+type MyDialogue = Dialogue<State, InMemStorage<State>>;
+type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
+
+#[derive(BotCommands, Clone)]
+#[command(rename_rule = "lowercase", description = "These commands are supported:")]
+enum Command {
+    #[command(description = "Start")]
+    Start,
+    #[command(description = "All urls")]
+    AllUrls,
+    #[command(description = "help command")]
+    Help,
+}
 #[derive(Clone, Default)]
 pub enum State {
     #[default]
     Start,
     ReceiveFullUrl,
-    ReceiveAge {
-        full_name: String,
-    },
-   SaveUrl {
-       full_url: String,
-   }
+
 }
-#[global_allocator]
-static GLOBAL: GlobalAlloc = GlobalAlloc;
-type MyDialogue = Dialogue<State, InMemStorage<State>>;
-type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     dotenv().expect("dotenv init failed");
@@ -56,6 +67,8 @@ async fn main() -> std::io::Result<()> {
     let http_task = async  {
         run_http_server(&http_server.host, http_server.port, handlers).await;
     };
+    set_bot_commands(&bot).await.expect("Failed to set commands");
+
     let bot_task = async  {
         Dispatcher::builder(
             bot,
@@ -73,24 +86,75 @@ async fn main() -> std::io::Result<()> {
     };
 
     tokio::join!(bot_task, http_task);
+
     Ok(())
 }
+async fn command_handler(
+    bot: Bot,
+    msg: Message,
+    cmd: Command,
+    dialogue: MyDialogue,
+) -> anyhow::Result<()> {
+    match cmd {
+        Command::Start => {
+            start(bot, dialogue, msg).await.expect("TODO: panic message");
+        }
+        Command::Help => {
+            bot.send_message(msg.chat.id, Command::descriptions().to_string()).await?;
+        }
+        Command::AllUrls => {
+                bot.send_message(msg.chat.id, format!("Получен URL: {}", "asdsad")).await?;
+                dialogue.update(State::Start).await?;
+        }
+    }
+    Ok(())
+}
+async fn set_bot_commands(bot: &Bot) -> anyhow::Result<()> {
+    let commands = Command::bot_commands()
+        .into_iter()
+        .map(|cmd| BotCommand {
+            command: cmd.command,
+            description: cmd.description.to_string(),
+        })
+        .collect::<Vec<_>>();
+
+    bot.set_my_commands(commands).scope(BotCommandScope::Default).await?;
+    Ok(())
+}
+
 async fn start(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
+    if let Some(txt) = msg.text() {
+        if txt != "/start" {
+            bot.send_message(msg.chat.id, "Please, write /start").await?;
+            return Ok(());
+        }
+    }
     bot.send_message(msg.chat.id, "Let's start! What's your full url?").await?;
     dialogue.update(State::ReceiveFullUrl).await?;
     Ok(())
 }
 async fn receive_full_url(bot: Bot, dialogue: MyDialogue, msg: Message, services: Arc<Services>) -> HandlerResult {
-    match msg.text() {
-        Some(full_url) => {
-            bot.send_message(msg.chat.id, format!("I am {}!", full_url)).await?;
-            let urls =services.url_service.get_all_url().await?;
-            bot.send_message(msg.chat.id, format!("all urls: {:?}",urls)).await?;
-            dialogue.update(State::SaveUrl { full_url: full_url.to_string() }).await?;
+    if let Some(valid_url) = extract_first_valid_url_from_message(&msg) {
+        if let Some(user) = &msg.from() {
+            let user_id = user.id;
+            let username = user.username.as_deref().unwrap_or("<no username>");
+            println!("valid url from {} ({}): {}", username, user_id, valid_url);
         }
-        None => {
-            bot.send_message(msg.chat.id, "Send me plain text.").await?;
+
+        match services.url_service.create_url(valid_url.to_string()).await {
+            Ok(created_url) => {
+                bot.send_message(msg.chat.id, format!("✅ Saved url: {:?}", created_url)).await?;
+            }
+            Err(e) => {
+                bot.send_message(msg.chat.id, "❌ Failed to save URL.").await?;
+                log::error!("Failed to create url: {:?}", e);
+            }
         }
+        dialogue
+            .update(State::ReceiveFullUrl )
+            .await?;
+    } else {
+        bot.send_message(msg.chat.id, "❌ Не удалось найти корректный URL в сообщении.").await?;
     }
     Ok(())
 }

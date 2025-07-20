@@ -6,7 +6,7 @@ COPY . .
 
 RUN cargo build --release --target x86_64-unknown-linux-musl --verbose
 
-FROM scratch AS runner
+FROM alpine:3.20 AS runner
 
 RUN apk add --no-cache libgcc
 

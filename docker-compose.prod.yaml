@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4200:4200"
-    env_file:
-      ".env"
+    environment:
+      "TELOXIDE_TOKEN":""
     command: ./url-shortener
     restart: always
 volumes:

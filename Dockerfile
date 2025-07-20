@@ -6,7 +6,7 @@ COPY . .
 
 RUN cargo build --release --target x86_64-unknown-linux-musl --verbose
 
-FROM scratch AS runner
+FROM alpine:3.20 AS runner
 
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/url-shortener ./url-shortener
 

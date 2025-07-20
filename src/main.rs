@@ -52,9 +52,11 @@ pub enum State {
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     init_env();
+   let token = std::env::var("TELOXIDE_TOKEN").expect("TELOXIDE_TOKEN env var not set");
     log::info!("Starting throw dice bot...");
+    log::info!("tk token: {}",token);
     let bot = Bot::new(
-        std::env::var("TELOXIDE_TOKEN").expect("TELOXIDE_TOKEN env var not set"),
+        token
     );
     let config = Config::new().await;
     let http_server = config.server.clone().unwrap_or_else(|| {

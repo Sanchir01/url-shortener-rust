@@ -1,4 +1,4 @@
-use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use rand::{Rng, distributions::Alphanumeric, thread_rng};
 
 pub async fn new_random_string(size: usize) -> Result<String, ()> {
     let s: String = thread_rng()

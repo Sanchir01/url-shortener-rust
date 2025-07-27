@@ -3,15 +3,15 @@ use crate::feature::url::repository::{UrlRepository, UrlRepositoryTrait};
 use crate::utils::random::new_random_string;
 use async_trait::async_trait;
 use mockall::automock;
+use std::sync::Arc;
 use uuid::Uuid;
-use std::sync::Arc; 
 
 #[cfg_attr(test, automock)]
 #[async_trait]
 pub trait UrlServiceTrait: Send + Sync {
     async fn get_all_url(&self) -> Result<Vec<Url>, sqlx::Error>;
     async fn create_url(&self, url: String) -> Result<(), sqlx::Error>;
-    async fn delete_url(&self, id: Uuid) -> Result<(),sqlx::Error>;
+    async fn delete_url(&self, id: Uuid) -> Result<(), sqlx::Error>;
 }
 #[derive(Clone)]
 pub struct UrlService {
@@ -36,8 +36,7 @@ impl UrlServiceTrait for UrlService {
         };
         self.url_repository.add_url(url, alias).await
     }
-    async fn delete_url(&self, id: Uuid) -> Result<(),sqlx::Error>{
+    async fn delete_url(&self, id: Uuid) -> Result<(), sqlx::Error> {
         self.url_repository.delete_url(id).await
     }
 }
-

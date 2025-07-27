@@ -1,7 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-    INSERT INTO url (alias, url) VALUES ('test', 'http://site.com');
-    INSERT INTO url (alias, url) VALUES ('test2', 'http://site.com');
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password BYTEA NOT NULL
 -- +goose StatementEnd
 
 -- +goose Down

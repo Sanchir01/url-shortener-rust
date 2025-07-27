@@ -15,7 +15,7 @@ pub async fn init_primary_db(config: &Config) -> Result<Pool<Postgres>, sqlx::Er
         db_config.username, db_config.password, db_config.host, db_config.port, db_config.database
     );
 
-     let pool = connect_with_retries(&database_url, db_config.retry).await;
+    let pool = connect_with_retries(&database_url, db_config.retry).await;
     pool
 }
 

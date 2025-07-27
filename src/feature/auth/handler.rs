@@ -1,4 +1,4 @@
-use crate::feature::auth::entity::{AuthGoogleDTO, RegisterDTO};
+use crate::feature::auth::entity::{AuthGoogleDTO, LoginDTO, RegisterDTO};
 use crate::feature::auth::service::{UserService, UserServiceTrait};
 use crate::utils::url::generate_google_oauth_url;
 use axum::http::Response;
@@ -150,6 +150,39 @@ pub async fn register_handler(
             Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 AxumJson(json!({"error": "Internal server error"})),
+            ))
+        }
+    }
+}
+
+pub async fn get_user_by_email_handler(
+    State(handler): State<Arc<UserHandler>>,
+    Json(payload): Json<LoginDTO>,
+) -> impl IntoResponse {
+    if let Err(validation_errors) = payload.validate() {
+        return Err((
+            StatusCode::UNPROCESSABLE_ENTITY,
+            AxumJson(json!({
+                "error": "Validation error",
+                "details": validation_errors
+            })),
+        ));
+    }
+    match handler
+        .user_service
+        .get_user_by_email_service(payload.email, payload.password)
+        .await
+    {
+        Ok(Some(user)) => Ok((StatusCode::OK, AxumJson(json!({ "user": user })))),
+        Ok(None) => Err((
+            StatusCode::NOT_FOUND,
+            AxumJson(json!({ "error": "User not found" })),
+        )),
+        Err(e) => {
+            eprintln!("❌ Internal error: {:?}", e);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                AxumJson(json!({ "error": "Internal server error" })),
             ))
         }
     }

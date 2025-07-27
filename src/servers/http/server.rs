@@ -1,4 +1,6 @@
-use crate::feature::auth::handler::{google_oauth_handler, handle_google_code, register_handler};
+use crate::feature::auth::handler::{
+    get_user_by_email_handler, google_oauth_handler, handle_google_code, register_handler,
+};
 use crate::feature::url::handler::{create_url_handler, delete_url_handler};
 use crate::{ApiDoc, app::handlers::Handlers, feature::url::handler::get_all_url_handler_axum};
 use axum::{
@@ -20,6 +22,7 @@ pub async fn run_http_server(host: &str, port: u16, handlers: Arc<Handlers>) {
         .route("/callback", post(handle_google_code));
     let auth_basic = Router::new()
         .route("/register", post(register_handler))
+        .route("/login", post(get_user_by_email_handler))
         .with_state(handlers.user_handle.clone());
     let public_routes = Router::new()
         .route("/url", get(get_all_url_handler_axum))

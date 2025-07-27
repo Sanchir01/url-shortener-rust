@@ -12,6 +12,11 @@ pub trait UserServiceTrait {
         email: String,
         password: String,
     ) -> Result<UserDB, sqlx::Error>;
+    async fn get_user_by_email_service(
+        &self,
+        email: String,
+        password: String,
+    ) -> Result<Option<UserDB>, sqlx::Error>;
 }
 pub struct UserService {
     user_repo: Arc<UserRepository>,
@@ -36,5 +41,12 @@ impl UserServiceTrait for UserService {
             .create_user(title, email, password_bytes)
             .await?;
         Ok(user)
+    }
+    async fn get_user_by_email_service(
+        &self,
+        email: String,
+        password: String,
+    ) -> Result<Option<UserDB>, sqlx::Error> {
+        self.user_repo.get_user_by_email(email).await
     }
 }

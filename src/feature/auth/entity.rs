@@ -18,6 +18,13 @@ pub struct RegisterDTO {
     #[validate(length(min = 1))]
     pub password: String,
 }
+#[derive(Deserialize, Validate, Serialize, Debug, ToSchema)]
+pub struct LoginDTO {
+    #[validate(email)]
+    pub email: String,
+    #[validate(length(min = 1))]
+    pub password: String,
+}
 #[derive(Deserialize, Serialize, Validate, ToSchema, sqlx::FromRow)]
 pub struct UserDB {
     pub id: Uuid,

@@ -1,7 +1,7 @@
 use crate::feature::auth::entity::UserDB;
 use async_trait::async_trait;
 use mockall::automock;
-use sea_query::{Alias, PostgresQueryBuilder, Query};
+use sea_query::{Alias, Expr, PostgresQueryBuilder, Query};
 use sea_query_binder::SqlxBinder;
 use sqlx::{Error, Pool, Postgres, query_as};
 #[cfg_attr(test, automock)]
@@ -14,6 +14,7 @@ pub trait UserRepositoryTrait {
         email: String,
         password: Vec<u8>,
     ) -> Result<UserDB, Error>;
+    async fn get_user_by_email(&self, email: String) -> Result<Option<UserDB>, Error>;
 }
 
 #[derive(Clone)]
@@ -87,6 +88,33 @@ impl UserRepositoryTrait for UserRepository {
         let user = sqlx::query_as_with::<_, UserDB, _>(&query, args)
             .fetch_one(&self.primary_db)
             .await?;
+        Ok(user)
+    }
+
+    async fn get_user_by_email(&self, email: String) -> Result<Option<UserDB>, Error> {
+        let (query, args) = Query::select()
+            .columns([
+                "id",
+                "title",
+                "email",
+                "password",
+                "role",
+                "created_at",
+                "updated_at",
+                "version",
+            ])
+            .from("users")
+            .and_where(Expr::col((Alias::new("users"), Alias::new("email"))).eq(email))
+            .build_sqlx(PostgresQueryBuilder);
+
+        let user = sqlx::query_as_with::<_, UserDB, _>(&query, args)
+            .fetch_optional(&self.primary_db)
+            .await
+            .map_err(|err| {
+                eprintln!("❌ Error fetching user by email: {:?}", err);
+                err
+            })?;
+
         Ok(user)
     }
 }
